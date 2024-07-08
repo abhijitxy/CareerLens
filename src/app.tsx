@@ -1,45 +1,24 @@
-// import { Button, Rows, Text } from "@canva/app-ui-kit";
-// import { addNativeElement } from "@canva/design";
-// import * as React from "react";
-// import styles from "styles/components.css";
-
-// export const App = () => {
-//   const onClick = () => {
-//     addNativeElement({
-//       type: "TEXT",
-//       children: ["Hello world!"],
-//     });
-//   };
-
-//   return (
-//     <div className={styles.scrollContainer}>
-//       <Rows spacing="2u">
-//         <Text>
-//           To make changes to this app, edit the <code>src/app.tsx</code> file,
-//           then close and reopen the app in the editor to preview the changes.
-//         </Text>
-//         <Button variant="primary" onClick={onClick} stretch>
-//           Do something shitty
-//         </Button>
-//       </Rows>
-//     </div>
-//   );
-// };
-
-import { Button, Rows, Text, MultilineInput } from "@canva/app-ui-kit";
+import { Button, Rows, Text, MultilineInput, Switch } from "@canva/app-ui-kit";
 import * as React from "react";
 import styles from "styles/components.css";
 
 export const App = () => {
   const [resumeText, setResumeText] = React.useState("");
+  const [aiFeedbackEnabled, setAiFeedbackEnabled] = React.useState(false);
+  const [salaryEstimateEnabled, setSalaryEstimateEnabled] = React.useState(false);
 
   const onChange = (value: string) => {
     setResumeText(value);
   };
 
   const onClick = () => {
-    // Simulate adding a text element to the design
     console.log("Adding text to design: ", resumeText);
+    if (aiFeedbackEnabled) {
+      console.log("AI Feedback enabled");
+    }
+    if (salaryEstimateEnabled) {
+      console.log("Salary Estimate enabled");
+    }
   };
 
   return (
@@ -54,9 +33,25 @@ export const App = () => {
           onChange={onChange}
           placeholder="Paste your resume text here"
         />
+        <Switch
+          label="AI Feedback"
+          onChange={() => setAiFeedbackEnabled(!aiFeedbackEnabled)}
+          value={aiFeedbackEnabled}
+        />
+        <Switch
+          label="Salary Estimate"
+          onChange={() => setSalaryEstimateEnabled(!salaryEstimateEnabled)}
+          value={salaryEstimateEnabled}
+        />
         <Button variant="primary" onClick={onClick} stretch>
           Analyze Resume
         </Button>
+        {aiFeedbackEnabled && (
+          <Text>AI Feedback feature is enabled. Feedback will be provided.</Text>
+        )}
+        {salaryEstimateEnabled && (
+          <Text>Salary Estimate feature is enabled. Estimates will be shown.</Text>
+        )}
       </Rows>
     </div>
   );
