@@ -6,18 +6,49 @@ export const App = () => {
   const [resumeText, setResumeText] = React.useState("");
   const [aiFeedbackEnabled, setAiFeedbackEnabled] = React.useState(false);
   const [salaryEstimateEnabled, setSalaryEstimateEnabled] = React.useState(false);
+  const [feedback, setFeedback] = React.useState("");
+  const [salaryEstimate, setSalaryEstimate] = React.useState("");
 
   const onChange = (value: string) => {
     setResumeText(value);
   };
 
-  const onClick = () => {
+  const onClick = async () => {
     console.log("Adding text to design: ", resumeText);
     if (aiFeedbackEnabled) {
       console.log("AI Feedback enabled");
+      const feedbackResponse = await fetch("http://localhost:8787/review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resumeText }),
+      });
+
+      if (feedbackResponse.ok) {
+        const feedbackData = await feedbackResponse.json();
+        setFeedback(feedbackData.feedback);
+      } else {
+        console.error("Failed to fetch AI feedback");
+      }
     }
+
     if (salaryEstimateEnabled) {
       console.log("Salary Estimate enabled");
+      const salaryResponse = await fetch("http://localhost:8787/salary-estimate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ resumeText }),
+      });
+
+      if (salaryResponse.ok) {
+        const salaryData = await salaryResponse.json();
+        setSalaryEstimate(salaryData.salaryEstimate);
+      } else {
+        console.error("Failed to fetch salary estimate");
+      }
     }
   };
 
@@ -46,11 +77,11 @@ export const App = () => {
         <Button variant="primary" onClick={onClick} stretch>
           Analyze Resume
         </Button>
-        {aiFeedbackEnabled && (
-          <Text>AI Feedback feature is enabled. Feedback will be provided.</Text>
+        {aiFeedbackEnabled && feedback && (
+          <Text>AI Feedback: {feedback}</Text>
         )}
-        {salaryEstimateEnabled && (
-          <Text>Salary Estimate feature is enabled. Estimates will be shown.</Text>
+        {salaryEstimateEnabled && salaryEstimate && (
+          <Text>Salary Estimate: {salaryEstimate}</Text>
         )}
       </Rows>
     </div>
