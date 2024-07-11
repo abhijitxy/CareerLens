@@ -10,6 +10,7 @@ export const App = () => {
   const [salaryEstimate, setSalaryEstimate] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [score, setScore] = React.useState(0);
+  const [salaryUsd, setSalaryUsd] = React.useState(0);
 
   const onChange = (value: string) => {
     setResumeText(value);
@@ -50,6 +51,7 @@ export const App = () => {
       if (salaryResponse.ok) {
         const salaryData = await salaryResponse.json();
         setSalaryEstimate(salaryData.salary_estimate_feedback);
+        setSalaryUsd(salaryData.salary_estimate_usd);
       } else {
         console.error("Failed to fetch salary estimate");
       }
@@ -82,6 +84,15 @@ export const App = () => {
         <Button variant="primary" onClick={onClick} stretch>
           Analyze Resume
         </Button>
+        {score > 0 && (
+          <Box>
+            <Text variant="regular">Score: {score}/100</Text>
+            <ProgressBar value={score} ariaLabel="Resume Score" />
+          </Box>
+        )}
+        {email && (
+            <Text>Email: {email}</Text>
+        )}
         {feedback && (
           <TypographyCard onClick={() => {}} ariaLabel="AI Feedback">
             <Text variant="regular">
@@ -92,20 +103,12 @@ export const App = () => {
         {salaryEstimate && (
           <TypographyCard onClick={() => {}} ariaLabel="Salary Estimate">
             <Text variant="regular">
-              <strong>Salary Estimate:</strong> {salaryEstimate}
+              <strong>Salary Estimate:</strong> {salaryEstimate} <br />
+              <strong>Estimated Salary (USD):</strong> {salaryUsd}
             </Text>
           </TypographyCard>
         )}
-        {email && (
-            <Text>Email: {email}</Text>
-          
-        )}
-        {score > 0 && (
-          <Box>
-            <Text variant="regular">Score: {score}/100</Text>
-            <ProgressBar value={score} ariaLabel="Resume Score" />
-          </Box>
-        )}
+        
       </Rows>
     </div>
   );
