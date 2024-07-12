@@ -1,4 +1,14 @@
-import { Button, Rows, Text, MultilineInput, Switch, TypographyCard, Box, ProgressBar, LoadingIndicator } from "@canva/app-ui-kit";
+import { 
+  Button, 
+  Rows, 
+  Text, 
+  MultilineInput, 
+  Switch, 
+  TypographyCard, 
+  Box, 
+  ProgressBar, 
+  LoadingIndicator 
+} from "@canva/app-ui-kit";
 import * as React from "react";
 import styles from "styles/components.css";
 
