@@ -1,4 +1,4 @@
-import { Button, Rows, Text, MultilineInput, Switch, TypographyCard, Alert, Box, ProgressBar } from "@canva/app-ui-kit";
+import { Button, Rows, Text, MultilineInput, Switch, TypographyCard, Box, ProgressBar, LoadingIndicator } from "@canva/app-ui-kit";
 import * as React from "react";
 import styles from "styles/components.css";
 
@@ -6,55 +6,86 @@ export const App = () => {
   const [resumeText, setResumeText] = React.useState("");
   const [aiFeedbackEnabled, setAiFeedbackEnabled] = React.useState(false);
   const [salaryEstimateEnabled, setSalaryEstimateEnabled] = React.useState(false);
+  const [coverLetterEnabled, setCoverLetterEnabled] = React.useState(false);
   const [feedback, setFeedback] = React.useState("");
   const [salaryEstimate, setSalaryEstimate] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [score, setScore] = React.useState(0);
   const [salaryUsd, setSalaryUsd] = React.useState(0);
+  const [coverLetter, setCoverLetter] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
   const onChange = (value: string) => {
     setResumeText(value);
   };
 
   const onClick = async () => {
-    console.log("Analyzing resume: ", resumeText);
-    if (aiFeedbackEnabled) {
-      console.log("AI Feedback enabled");
-      const feedbackResponse = await fetch("http://localhost:8787/review", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ resumeText }),
-      });
+    setLoading(true);
+    try {
+      if (aiFeedbackEnabled) {
+        const feedbackResponse = await fetch("http://localhost:8787/review", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ resumeText }),
+        });
 
-      if (feedbackResponse.ok) {
-        const feedbackData = await feedbackResponse.json();
-        setFeedback(feedbackData.feedback);
-        setEmail(feedbackData.email);
-        setScore(feedbackData.score);
-      } else {
-        console.error("Failed to fetch AI feedback");
+        if (feedbackResponse.ok) {
+          const feedbackData = await feedbackResponse.json();
+          setFeedback(feedbackData.feedback);
+          setEmail(feedbackData.email);
+          setScore(feedbackData.score);
+        } else {
+          console.error("Failed to fetch AI feedback");
+        }
       }
+
+      if (salaryEstimateEnabled) {
+        const salaryResponse = await fetch("http://localhost:8787/salary-estimate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ resumeText }),
+        });
+
+        if (salaryResponse.ok) {
+          const salaryData = await salaryResponse.json();
+          setSalaryEstimate(salaryData.salary_estimate_feedback);
+          setSalaryUsd(salaryData.salary_estimate_usd);
+        } else {
+          console.error("Failed to fetch salary estimate");
+        }
+      }
+
+      if (coverLetterEnabled) {
+        const coverLetterResponse = await fetch("http://localhost:8787/cover-letter", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ resumeText }),
+        });
+
+        if (coverLetterResponse.ok) {
+          const coverLetterData = await coverLetterResponse.text();
+          setCoverLetter(coverLetterData);
+        } else {
+          console.error("Failed to fetch cover letter");
+        }
+      }
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (salaryEstimateEnabled) {
-      console.log("Salary Estimate enabled");
-      const salaryResponse = await fetch("http://localhost:8787/salary-estimate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ resumeText }),
-      });
-
-      if (salaryResponse.ok) {
-        const salaryData = await salaryResponse.json();
-        setSalaryEstimate(salaryData.salary_estimate_feedback);
-        setSalaryUsd(salaryData.salary_estimate_usd);
-      } else {
-        console.error("Failed to fetch salary estimate");
-      }
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert("Cover letter copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
     }
   };
 
@@ -81,26 +112,32 @@ export const App = () => {
           onChange={() => setSalaryEstimateEnabled(!salaryEstimateEnabled)}
           value={salaryEstimateEnabled}
         />
+        <Switch
+          label="Cover Letter"
+          onChange={() => setCoverLetterEnabled(!coverLetterEnabled)}
+          value={coverLetterEnabled}
+        />
         <Button variant="primary" onClick={onClick} stretch>
           Analyze Resume
         </Button>
-        {score > 0 && (
+        {loading && <LoadingIndicator />}
+        {!loading && score > 0 && (
           <Box>
             <Text variant="regular">Score: {score}/100</Text>
             <ProgressBar value={score} ariaLabel="Resume Score" />
           </Box>
         )}
-        {email && (
-            <Text>Email: {email}</Text>
+        {!loading && email && (
+          <Text>Email: {email}</Text>
         )}
-        {feedback && (
+        {!loading && feedback && (
           <TypographyCard onClick={() => {}} ariaLabel="AI Feedback">
             <Text variant="regular">
               <strong>AI Feedback:</strong> {feedback}
             </Text>
           </TypographyCard>
         )}
-        {salaryEstimate && (
+        {!loading && salaryEstimate && (
           <TypographyCard onClick={() => {}} ariaLabel="Salary Estimate">
             <Text variant="regular">
               <strong>Salary Estimate:</strong> {salaryEstimate} <br />
@@ -108,8 +145,18 @@ export const App = () => {
             </Text>
           </TypographyCard>
         )}
-        
+        {!loading && coverLetter && (
+          <TypographyCard onClick={() => {}} ariaLabel="Cover Letter">
+            <Text variant="regular">
+              <strong>Cover Letter:</strong> {coverLetter}
+            </Text>
+            <Button variant="primary" onClick={() => copyToClipboard(coverLetter)}>
+              Copy Cover Letter
+            </Button>
+          </TypographyCard>
+        )}
       </Rows>
     </div>
   );
 };
+
