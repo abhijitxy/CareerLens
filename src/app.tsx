@@ -33,7 +33,7 @@ export const App = () => {
     setLoading(true);
     try {
       if (aiFeedbackEnabled) {
-        const feedbackResponse = await fetch("http://localhost:8787/review", {
+        const feedbackResponse = await fetch("https://canva-backend.roya51788.workers.dev/review", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export const App = () => {
       }
 
       if (salaryEstimateEnabled) {
-        const salaryResponse = await fetch("http://localhost:8787/salary-estimate", {
+        const salaryResponse = await fetch("https://canva-backend.roya51788.workers.dev/salary-estimate", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export const App = () => {
       }
 
       if (coverLetterEnabled) {
-        const coverLetterResponse = await fetch("http://localhost:8787/cover-letter", {
+        const coverLetterResponse = await fetch("https://canva-backend.roya51788.workers.dev/cover-letter", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
